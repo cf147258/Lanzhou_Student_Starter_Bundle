@@ -1,0 +1,5 @@
+case,seed,byte_offset,mask,truncate_to,delivery_order,expected_verdict,expected_actuator_writes
+bitflip,20260719,31,4,56,in-order,NACK_CRC,0
+truncate,20260719,0,0,31,in-order,NACK_LENGTH,0
+reorder,20260719,0,0,56,42-before-41,NACK_SEQUENCE,0
+unit-plus-bitflip,20260719,31,4,56,in-order,NACK_CRC,0

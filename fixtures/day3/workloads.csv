@@ -1,0 +1,4 @@
+fixture_id,client_count,classes,repetitions,metric_clock,required_metrics
+D3_CLIENTS_1,1,fast,5,CLOCK_MONOTONIC,p50|p95|p99|max|queue_age
+D3_CLIENTS_10,10,fast|slow|flood|safety,5,CLOCK_MONOTONIC,p50|p95|p99|max|queue_age
+D3_CLIENTS_50,50,fast|slow|flood|safety,5,CLOCK_MONOTONIC,p50|p95|p99|max|queue_age

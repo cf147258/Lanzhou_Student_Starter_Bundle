@@ -1,0 +1,11 @@
+{
+  "fixture_id": "E_STOP_100",
+  "seed": 20260719,
+  "repetitions": 100,
+  "planner_hz": 50,
+  "ordinary_sources": ["fast", "slow", "flood", "controller"],
+  "ready_sources": ["eventfd_estop", "controller", "timerfd", "motion"],
+  "deadline_ns": 50000000,
+  "expected_passes": 100,
+  "expected_ordinary_ahead_after_preempt": 0
+}

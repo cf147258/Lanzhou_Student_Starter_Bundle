@@ -1,0 +1,12 @@
+{
+  "day": 3,
+  "seed": 20260719,
+  "input_tag": "transport_v1",
+  "output_tag": "runtime_poll_v1",
+  "fixtures": ["clients.csv", "workloads.csv"],
+  "linux_api": ["fcntl", "poll", "read", "write"],
+  "client_counts": [1, 10, 50],
+  "work_budget": 4,
+  "max_queue_bytes": 8192,
+  "max_queue_age_ns": 50000000
+}

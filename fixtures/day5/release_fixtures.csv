@@ -1,0 +1,8 @@
+fixture_id,class,input,expected_verdict,expected_writes
+R0,happy,valid_fresh_safe,APPROVE,1
+R1,corrupt,frame_bit_flip,REJECT,0
+R2,stale,command_age_ns=100000001,REJECT,0
+R3,unsafe,q_target_rad_0=3.641592653589793,REJECT,0
+R4,reorder,sequence_not_new,REJECT,0
+R5,overload,writer_queue_full,REJECT,0
+R6,controller_fault,stall|nan|range|low_confidence,FALLBACK_OR_DISCARD,0

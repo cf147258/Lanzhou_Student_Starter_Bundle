@@ -1,0 +1,10 @@
+{
+  "fixture_version": "1.0.0",
+  "seed": 20260719,
+  "simulator_only": true,
+  "arm_dof": 3,
+  "units": {"position": "rad", "velocity": "rad/s", "time": "ns"},
+  "frame_id": 1,
+  "fixed_step_ns": 10000000,
+  "faults": ["bitflip", "truncate", "reorder", "unit-plus-bitflip"]
+}

@@ -1,0 +1,4 @@
+topic,qos,retention,acceptance_policy
+arm/state,0,latest,valid-and-fresh
+arm/cmd,1,none,valid-new-and-fresh
+arm/estop,1,none,preserve-source-age

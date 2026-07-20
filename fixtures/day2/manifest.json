@@ -1,0 +1,9 @@
+{
+  "fixture_version": "1.0.0",
+  "seed": 20260719,
+  "broker": "loopback-only Mosquitto",
+  "max_command_age_ns": 100000000,
+  "timebase": "CLOCK_MONOTONIC",
+  "timestamp_order": ["t_pub", "t_rx", "t_gate", "t_ack"],
+  "workloads": ["normal", "duplicate", "reordered_old", "stale_new", "clock_error"]
+}

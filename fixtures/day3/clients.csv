@@ -1,0 +1,5 @@
+fixture_id,client_id,class,ready_bytes,pause_ms,queued_bytes,expected_policy
+D3_FAST,1,fast,1,0,1,dispatch_within_budget
+D3_SLOW,2,slow,1,120,1,never_block_fast_or_safety
+D3_FLOOD,3,flood,64,0,8193,drop_fail_closed
+D3_SAFETY,4,safety,1,0,1,dispatch_within_budget

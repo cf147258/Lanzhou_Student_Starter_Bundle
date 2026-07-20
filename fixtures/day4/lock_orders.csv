@@ -1,0 +1,3 @@
+fixture_id,acquire_order,expected_result
+LOCK_VALID,queue>state>wire,terminate_one_writer
+LOCK_REVERSED,wire>state,reject_before_wait

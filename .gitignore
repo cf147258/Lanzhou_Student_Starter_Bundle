@@ -1,0 +1,12 @@
+/build/
+/out/
+/evidence/smoke/
+/evidence/demos/
+/evidence/qa_day*/
+/evidence/G*_D*_evidence/
+/checkpoints/*.tar.gz
+/checkpoints/backups/
+__pycache__/
+*.pyc
+*.log
+.DS_Store

@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+if [ "$(uname -s)" != "Linux" ]; then
+    echo "error: this starter runs only inside Linux" >&2
+    exit 2
+fi
+
+if [ "$(id -u)" -eq 0 ]; then
+    echo "error: the course container must run as a non-root user" >&2
+    exit 2
+fi
+
+umask 0022
+exec "$@"

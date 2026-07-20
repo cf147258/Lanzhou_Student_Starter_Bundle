@@ -1,0 +1,8 @@
+fixture_id,category,input,expected_verdict,expected_reason,expected_writes
+F1,check_write_race,mutate_source_after_submit,APPROVE,NONE,1
+F2,reversed_lock_order,wire_before_state,REJECT,INTERNAL,0
+F3,nan_command,q_target_rad_0=nan,REJECT,NONFINITE,0
+F4A,joint_range,q_target_rad_0=3.151592653589793,REJECT,JOINT_RANGE,0
+F4B,joint_rate,q_target_rad_0=0.10_over_10ms,REJECT,RATE_LIMIT,0
+F5,stale_state,state_age_ns=100000001,REJECT,STALE_STATE,0
+F6,uncertainty,sigma_q_rad_0=0.11,REJECT,UNCERTAINTY,0

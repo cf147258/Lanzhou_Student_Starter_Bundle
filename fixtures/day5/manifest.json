@@ -1,0 +1,18 @@
+{
+  "day": 5,
+  "seed": 20260719,
+  "input_tag": "safety_v1",
+  "intermediate_tag": "runtime_async_v1",
+  "output_tag": "release_v1",
+  "fixtures": [
+    "release_fixtures.csv",
+    "controller_faults.csv",
+    "estop_100.json"
+  ],
+  "linux_api": ["epoll", "eventfd", "timerfd"],
+  "epoll_mode": "level_triggered",
+  "planner_hz": 50,
+  "estop_deadline_ns": 50000000,
+  "controller_timeout_ns": 40000000,
+  "minimum_controller_confidence": 0.60
+}
