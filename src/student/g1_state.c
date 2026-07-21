@@ -44,13 +44,11 @@ bool state_valid(const ArmState *state, const ArmState *previous) {
         /* DAY5_G1_TODO_A: reject sequence or time regression during replay across
            the controller-host boundary. */
            
-        // 时间和序列号必须严格单调递增
-        // 只要是严格大于 (>), 即可兼容慢消费者的 jump (gap), 
-        // 并且严格拒绝了任何时间倒退、相同时间戳或序列号回放 (regression/replay)
+        // Day 2 核心要求：拒绝非递增序列（即小于或等于前一个序号），以及拒绝时间倒退
         if (state->seq <= previous->seq) {
             return false;
         }
-        if (state->t_mono_ns <= previous->t_mono_ns) {
+        if (state->t_mono_ns < previous->t_mono_ns) {
             return false;
         }
     }
@@ -98,8 +96,6 @@ void twin_step(ArmState *state, const ArmCommand *command, int64_t step_ns) {
 uint64_t state_schema_hash(void) {
     /* DAY1_G1_TODO_C: hash the frozen field names, units and dimensions. */
     
-    // 在工业协议与进程间通信中，通常使用哈希来验证两端使用了相同的数据结构定义
-    // 这里使用 FNV-1a 算法对字段名、单位和维度特征字符串进行哈希。
     const char *schema = "seq:u64,t_mono_ns:i64,frame_id:u8,q_rad:f64[3],dq_rad_s:f64[3],sigma_q_rad:f32[3]";
     
     uint64_t hash = 0xcbf29ce484222325ULL;
