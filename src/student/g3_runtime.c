@@ -181,123 +181,6 @@ int poll_service_once(ClientState *clients, size_t client_count,
     return ready;
 }
 
-
-// int poll_service_once(ClientState *clients, size_t client_count,
-//                       int timeout_ms, RuntimeStats *stats) {
-//     struct pollfd fds[COURSE_MAX_CLIENTS];
-//     int ready;
-
-//     if (stats == NULL || client_count > COURSE_MAX_CLIENTS ||
-//         (client_count != 0 && clients == NULL)) {
-//         errno = EINVAL;
-//         return -1;
-//     }
-
-//     memset(stats, 0, sizeof(*stats));
-//     stats->max_queue_age_ns = COURSE_MAX_QUEUE_AGE_NS;
-//     stats->max_work_per_client = COURSE_WORK_BUDGET;
-
-//     memset(fds, 0, sizeof(fds));
-//     for (size_t index = 0; index < client_count; index++) {
-//         clients[index].work_this_turn = 0;
-//         fds[index].fd = clients[index].fd;
-//         fds[index].events = POLLIN;
-//     }
-
-//     /* The supplied scaffold performs the readiness wait without blocking on a
-//        client. Students own the bounded service policy after poll returns. */
-//     ready = poll(fds, (nfds_t)client_count, timeout_ms);
-//     if (ready <= 0) {
-//         return ready;
-//     }
-
-//     for (size_t index = 0; index < client_count; index++) {
-//         if ((fds[index].revents & (POLLIN | POLLHUP | POLLERR)) != 0) {
-//             stats->ready_events++;
-//         }
-//     }
-
-//     /* DAY3_G3_TODO: retain partial frames, enforce COURSE_WORK_BUDGET, and
-//        apply byte backpressure while servicing each ready descriptor. */
-//     /* DAY4_G3_TODO_A: expire over-age queued work before service and expose
-//        queue age/drop evidence without blocking. */
-//        /*day 4*/
-//        for (size_t i = 0; i < client_count; i++) {
-//         ClientState *client = &clients[i];
-//         short revents = fds[i].revents;
-
-//         /* 只处理可读、挂断或出错的事件 */
-//         if (!(revents & (POLLIN | POLLHUP | POLLERR))) {
-//             continue;
-//         }
-//         if (revents & (POLLHUP | POLLERR)) {
-//             /* 简单跳过错误或挂断，由上层决定是否关闭 */
-//             continue;
-//         }
-
-//         uint64_t now = monotonic_ns();
-
-//         /* —— 过期检查 —— */
-//         if (client->oldest_enqueue_ns != 0 &&
-//             (now - client->oldest_enqueue_ns) > COURSE_MAX_QUEUE_AGE_NS) {
-//             size_t dropped_bytes = client->queued_bytes;
-//             if (dropped_bytes > 0) {
-//                 client->dropped_total += dropped_bytes;
-//                 stats->flood_dropped++;   /* 一次过期丢弃事件 */
-//                 /* 清空缓冲区 */
-//                 client->input_used = 0;
-//                 client->queued_bytes = 0;
-//                 client->oldest_enqueue_ns = 0;
-//             }
-//         }
-//         /*day 3*/
-//         size_t work_done = 0;
-
-//         /* 每个客户端最多处理 COURSE_WORK_BUDGET 次读取操作 */
-//         while (work_done < COURSE_WORK_BUDGET) {
-//             size_t available_space = COURSE_CLIENT_BUFFER_SIZE - client->input_used;
-//             bool queue_full = (client->queued_bytes >= COURSE_MAX_QUEUE_BYTES) ||
-//                               (available_space == 0);
-
-//             if (queue_full) {
-//                 /* —— 字节背压：队列已满，读取并丢弃 —— */
-//                 char tmp[512];
-//                 ssize_t n = read(client->fd, tmp, sizeof(tmp));
-//                 if (n <= 0) {
-//                     if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-//                         break;   /* 暂时无数据，退出本次轮询 */
-//                     }
-//                     break;       /* 错误或 EOF */
-//                 }
-//                 client->dropped_total += (size_t)n;
-//                 stats->flood_dropped++;
-//                 work_done++;
-//                 continue;
-//             }
-
-//             /* —— 队列未满，读取并存储到 input 缓冲区 —— */
-//             size_t to_read = (available_space < 512) ? available_space : 512;
-//             ssize_t n = read(client->fd, client->input + client->input_used, to_read);
-//             if (n <= 0) {
-//                 if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-//                     break;
-//                 }
-//                 break;
-//             }
-//             client->input_used += (size_t)n;
-//             client->queued_bytes += (size_t)n;
-//             if (client->oldest_enqueue_ns == 0) {
-//                 client->oldest_enqueue_ns = now;
-//             }
-//             work_done++;
-//         }
-
-//         client->work_this_turn = work_done;
-//     }
-
-//     return ready;
-// }
-
 int epoll_wait_priority(int epoll_fd, int wake_fd, int controller_fd,
                         int timer_fd, int motion_fd, int timeout_ms,
                         uint64_t cancel_generation, ReadyEvent *event) {
@@ -320,11 +203,36 @@ int epoll_wait_priority(int epoll_fd, int wake_fd, int controller_fd,
 
     /* DAY5_G3_TODO_A: select emergency wake first, then timer, controller,
        and motion readiness without losing the cancellation generation. */
-    (void)wake_fd;
-    (void)controller_fd;
-    (void)timer_fd;
-    (void)motion_fd;
-    (void)events;
     event->observed_ns = monotonic_ns();
+
+    /* Priority order: wake_fd (ESTOP) > timer_fd (TIMER) > controller_fd (CONTROLLER) > motion_fd (MOTION) */
+    for (int i = 0; i < ready; i++) {
+        if (events[i].data.fd == wake_fd && (events[i].events & EPOLLIN)) {
+            event->kind = COURSE_READY_ESTOP;
+            return ready;
+        }
+    }
+
+    for (int i = 0; i < ready; i++) {
+        if (events[i].data.fd == timer_fd && (events[i].events & EPOLLIN)) {
+            event->kind = COURSE_READY_TIMER;
+            return ready;
+        }
+    }
+
+    for (int i = 0; i < ready; i++) {
+        if (events[i].data.fd == controller_fd && (events[i].events & EPOLLIN)) {
+            event->kind = COURSE_READY_CONTROLLER;
+            return ready;
+        }
+    }
+
+    for (int i = 0; i < ready; i++) {
+        if (events[i].data.fd == motion_fd && (events[i].events & EPOLLIN)) {
+            event->kind = COURSE_READY_MOTION;
+            return ready;
+        }
+    }
+
     return ready;
 }
